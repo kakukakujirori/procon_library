@@ -1,4 +1,5 @@
 class BIT:
+
     """
     https://tjkendev.github.io/procon-library/python/range_query/bit.html
     Binary index treeの実装。
@@ -11,6 +12,7 @@ class BIT:
         2. 区間[i, j]の全ての数にxを加算する
     もO(logN)で行うことができる。
     """
+
     def __init__(self, n):
         """
         添字は1スタート

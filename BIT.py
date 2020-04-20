@@ -50,3 +50,4 @@ class BIT:
         if j is None:
             return self.el[i]
         return self.sum(j) - self.sum(i - 1)
+

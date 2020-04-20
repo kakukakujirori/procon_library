@@ -2,15 +2,14 @@ class BIT:
 
     """
     https://tjkendev.github.io/procon-library/python/range_query/bit.html
-    Binary index treeの実装。
+    Binary index treeの実装
     配列[a1, a2,...,an]に対して以下のクエリをO(logn)で行う:
         1. aiにxを加える
         2. 区間和 ai + a(i+1) + ... + aj の和を求める
-
     isom法を使えば、
         1. aiの値を取得する
         2. 区間[i, j]の全ての数にxを加算する
-    もO(logN)で行うことができる。
+    もO(logN)で行うことができる
     """
 
     def __init__(self, n):
@@ -51,4 +50,3 @@ class BIT:
         if j is None:
             return self.el[i]
         return self.sum(j) - self.sum(i - 1)
-

@@ -36,22 +36,39 @@ class Combination:
         return modinv
 
 
+def factorization(n):
+    if n <= 1:
+        print("Input must be over 2!!!!!!")
+        return
+    arr = []
+    temp = n
+    for i in range(2, int(round(n ** 0.5)) + 1):
+        cnt = 0
+        while temp % i == 0:
+            cnt+=1
+            temp //= i
+        if cnt > 0: arr.append([i, cnt])
+    if temp!=1: arr.append([temp, 1])
+    if arr==[]: arr.append([n, 1])
+    return arr
+
+
 def get_sieve_of_eratosthenes(n):
     """
-    エラトステネスの篩
+    エラトステネスの篩。√N以下の数に対して2から順にその数の倍数を消していく。
+    計算量は「調和級数」になるのがミソ。具体的には
+        N/2 + N/3 + N/5 + ... + N/(√N) = N * (1/2 + 1/3 + 1/5 + ... + 1/√N)
+                                       = N * loglog(√N) (素数の逆数和の発散スピードがこれ)
+                                       = N(loglogN - log2)
     """
     if not isinstance(n, int):
         raise TypeError('n is int type.')
     if n < 2:
-        return []
-    prime = [2]
-    limit = int(n**0.5)
-    data = [i + 1 for i in range(2, n, 2)]
-    while True:
-        p = data[0]
-        if limit < p:
-            return prime + data
-        prime.append(p)
-        data = [e for e in data if e % p != 0]
-
-
+        return [0] * (n + 1)
+    prime = [1] * (n + 1)
+    prime[0] = prime[1] = 0
+    for i in range(2, int(n**0.5) + 1):
+        if not prime[i]: continue
+        for j in range(i * 2, n + 1, i):
+            prime[j] = 0
+    return prime

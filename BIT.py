@@ -39,7 +39,7 @@ class BIT:
         s = 0
         while i > 0:
             s += self.data[i]
-            i -= i & -i
+            i -= i & -i # i $ (-i)でiの最下位ビットのみ立った値を得る
         return s
 
     def get(self, i, j=None):

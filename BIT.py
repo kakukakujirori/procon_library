@@ -3,7 +3,7 @@ class BIT:
     """
     https://tjkendev.github.io/procon-library/python/range_query/bit.html
     Binary index treeの実装
-    配列[a1, a2,...,an]に対して以下のクエリをO(logn)で行う:
+    1-indexedの配列[a1, a2,...,an]に対して以下のクエリをO(logn)で行う:
         1. aiにxを加える
         2. 区間和 ai + a(i+1) + ... + aj の和を求める
     isom法を使えば、
@@ -25,7 +25,7 @@ class BIT:
         i>0に対してaiにxを加算(x < 0でもOK)
         """
         if i <= 0 or self.n < i:
-            print("i should be within 1 to n")
+            raise ValueError("i should be within 1 to n")
         else:
             self.el[i] += x
             while i <= self.n:

@@ -2,7 +2,7 @@ class UnionFind():
     """
     https://note.nkmk.me/python-union-find/
     DFSの上位互換と考えて良い
-    ２要素x, yがpath-connectedかどうかをlogオーダーで判定する（螺旋本の14.1節参照）
+    ２要素x, yがpath-connectedかどうかをほぼ定数オーダーで判定する（螺旋本の14.1節参照）
     さらに連結成分の要素数がO(1)で取得可能なように改造してある
     """
     def __init__(self, n):
@@ -86,4 +86,3 @@ class UnionFind():
         連結成分およびその代表元を出力
         """
         return '\n'.join('{}: {}'.format(r, self.members(r)) for r in self.roots())
- 

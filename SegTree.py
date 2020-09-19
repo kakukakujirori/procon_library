@@ -1,54 +1,50 @@
-class Seg_min():
+class Seg_tree():
     """
-    0-indexedの配列[a0, a1, a2, ..., a(x-1)]に対して以下のクエリをそれぞれO(logx)で行う：
+    0-indexedの配列[a0, a1, a2, ..., a(N-1)]に対して以下のクエリをそれぞれO(logx)で行う：
         1. i番目の要素にxを代入
-        2. 区間[i, j]内の最小値を返す
+        2. 半開区間[i, j)内の最小値を返す
+    self.id_elemとself.funcを変えることでRmQ以外にも例えばRMQに対応可能。
+    参考：https://juppy.hatenablog.com/entry/2019/05/02/蟻本_python_セグメント木_競技プログラミング_Atcoder
     """
-    def __init__(self,x):
-        #####単位元######
-        self.ide_ele_min = 10**10
+    def __init__(self, N):
+        #####identity element######
+        self.id_elem = 10**10
         self.func = min
 
-        self.n = len(x)
+        #num_max: the smallest power of two over N
+        self.num_max = 2 ** ((N - 1).bit_length())
+        self.x = [self.id_elem] * (2 * self.num_max - 1)
 
-        #num_max:n以上の最小の2のべき乗
-        self.num_max =2**(self.n-1).bit_length()
-        self.x = [self.ide_ele_min]*2*self.num_max
+    def get_elem(self, i):
+        """
+        i番目の要素を返す
+        """
+        return self.x[self.num_max + i - 1]
 
-        for i,num in enumerate(x, self.num_max):
-            self.x[i] = num
-        for i in range(self.num_max-1,0,-1):
-            self.x[i] = self.func(self.x[i<<1],self.x[(i<<1) + 1])
-
-    def update(self,i,x):
+    def update(self, i, x):
         """
         i番目の要素にxを代入
         """
-        i += self.num_max
+        i += self.num_max - 1
         self.x[i] = x
-        while(i>0):
-            i = i//2
-            self.x[i] = self.func(self.x[i<<1],self.x[(i<<1) + 1])
+        while (i > 0):
+            i = (i - 1) // 2
+            self.x[i] = self.func(self.x[i * 2 + 1], self.x[i * 2 + 2])
 
-    def query(self,i,j):
+    def query(self, i=0, j=-1, k=0, l=0, r=-1):
         """
-        区間[i, j]内の最小値を返す
+        半開区間[i, j)内の最小値を返す
+        [l, r)はノードkに対応づく区間を与える
+        query()で配列全体に対してクエリを実行する
         """
-        res = self.ide_ele_min
-        if i>=j:
-            return res
-        i += self.num_max
-        j += self.num_max -1
-        while(i<=j):
-            if(i==j):
-                res = self.func(res,self.x[i])
-                break
-            if(i&1):
-                res = self.func(res,self.x[i])
-                i += 1
-            if(not j&1):
-                res = self.func(res,self.x[j])
-                j -= 1
-            i = i>>1
-            j = j>>1
-        return res
+        if j == -1: j = self.num_max
+        if r == -1: r = self.num_max
+
+        # [i, j) and [l, r) are disjoint
+        if (r <= i or j <= l): return self.id_elem
+        # [l, r) is included in [i, j)
+        if (i <= l and r <= j): return self.x[k]
+        # [i, j] and [l, r) partially intersect
+        vl = self.query(i, j, k * 2 + 1, l, (l + r) // 2)
+        vr = self.query(i, j, k * 2 + 2, (l + r) // 2, r)
+        return self.func(vl, vr)

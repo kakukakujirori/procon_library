@@ -1,4 +1,4 @@
-class Seg_tree():
+class SegTree():
     """
     0-indexedの配列[a0, a1, a2, ..., a(N-1)]に対して以下のクエリをそれぞれO(logx)で行う：
         1. i番目の要素にxを代入
@@ -8,8 +8,8 @@ class Seg_tree():
     """
     def __init__(self, N):
         #####identity element######
-        self.id_elem = 10**10
-        self.func = min
+        self.id_elem = 0
+        self.func = max
 
         #num_max: the smallest power of two over N
         self.num_max = 2 ** ((N - 1).bit_length())
@@ -31,20 +31,22 @@ class Seg_tree():
             i = (i - 1) // 2
             self.x[i] = self.func(self.x[i * 2 + 1], self.x[i * 2 + 2])
 
-    def query(self, i=0, j=-1, k=0, l=0, r=-1):
+    def query(self, i=0, j=-1):
         """
         半開区間[i, j)内の最小値を返す
-        [l, r)はノードkに対応づく区間を与える
         query()で配列全体に対してクエリを実行する
         """
         if j == -1: j = self.num_max
-        if r == -1: r = self.num_max
-
-        # [i, j) and [l, r) are disjoint
-        if (r <= i or j <= l): return self.id_elem
-        # [l, r) is included in [i, j)
-        if (i <= l and r <= j): return self.x[k]
-        # [i, j] and [l, r) partially intersect
-        vl = self.query(i, j, k * 2 + 1, l, (l + r) // 2)
-        vr = self.query(i, j, k * 2 + 2, (l + r) // 2, r)
-        return self.func(vl, vr)
+        i += self.num_max - 1
+        j += self.num_max - 1
+        res = self.id_elem
+        
+        while i < j:
+            if i % 2 == 0:
+                res = self.func(res, self.x[i])
+                i += 1
+            if j % 2 == 0:
+                res = self.func(res, self.x[j - 1])
+            i = (i - 1) // 2
+            j = (j - 1) // 2
+        return res

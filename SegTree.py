@@ -8,8 +8,8 @@ class SegTree():
     """
     def __init__(self, N):
         #####identity element######
-        self.id_elem = 0
-        self.func = max
+        self.id_elem = 10**10
+        self.func = min
 
         #num_max: the smallest power of two over N
         self.num_max = 2 ** ((N - 1).bit_length())

@@ -37,9 +37,7 @@ class Combination:
 
 
 def factorization(n):
-    if n <= 1:
-        print("Input must be over 2!!!!!!")
-        return
+    assert n > 1, "factorization: input must be over 2, but given {}".format(n)
     arr = []
     temp = n
     for i in range(2, int(round(n ** 0.5)) + 1):
@@ -71,3 +69,26 @@ def get_sieve_of_eratosthenes(n):
         if prime[p] != p: continue
         for i in range(p * 2, n + 1, p): prime[i] = p
     return prime
+
+
+def euler_phi(n):
+    """
+    オイラーのトーシェント関数（1,...,Nの中でNと互いに素なものの個数）を計算する。
+    計算量はO(√n)。計算には次の公式を用いている：
+        phi(n) = n * ¥prod_{p:prime, p|n} (1 - 1/p)
+    """
+    assert n > 0, "euler_phi: input must be positive, but given {}".format(n)
+    if n <= 2: return 1
+    if n <= 4: return 2
+    ret = n
+    root_n = int(n ** 0.5) - 1
+    while (root_n + 1) ** 2 <= n: root_n += 1
+ 
+    for x in range(2, root_n+1):
+        if n % x == 0:
+            ret -= ret // x
+            while n % x == 0:
+                n //= x
+    if n > 1:
+        ret -= ret // n
+    return ret

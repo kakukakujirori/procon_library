@@ -92,3 +92,13 @@ def euler_phi(n):
     if n > 1:
         ret -= ret // n
     return ret
+
+def isqrt(n):
+    """
+    Newton's method
+    nの平方根のfloorを求める。math.isqrtにも実装されてる。
+    """
+    x, y = n, (n + 1) // 2
+    while y < x:
+        x, y = y, (y + n // y) // 2
+    return x

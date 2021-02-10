@@ -1,3 +1,13 @@
+import numpy as np
+from numba import jitclass, i8
+
+spec = [
+    ('n', i8),
+    ('data', i8[:]),
+    ('el', i8[:])
+]
+
+@jitclass(spec)
 class BIT:
 
     """
@@ -17,8 +27,8 @@ class BIT:
         添字は1スタート
         """
         self.n = n
-        self.data = [0] * (n + 1)
-        self.el = [0] * (n + 1)
+        self.data = np.zeros(n + 1, dtype=np.int64)
+        self.el = np.zeros(n + 1, dtype=np.int64)
 
     def add(self, i, x):
         """

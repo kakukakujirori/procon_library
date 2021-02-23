@@ -1,39 +1,49 @@
 import math
+import numpy as np
+from numba import njit, jitclass, b1, i1, i4, i8, f8
 
 
+spec = [
+    ('n_max', i8),
+    ('mod', i8),
+    ('modinv', i8[:]),
+    ('fac', i8[:]),
+    ('facinv', i8[:]),
+]
+
+@jitclass(spec)
 class Combination:
     """
     O(n)の前計算を1回行うことで，O(1)でnCr mod mを求められる
     n_max = 10**6のとき前処理は約950ms (PyPyなら約340ms, 10**7で約1800ms)
     使用例：
     comb = Combination(1000000)
-    print(comb(5, 3))  # 10
+    print(comb.calc(5, 3))  # 10
     """
     def __init__(self, n_max, mod=10**9+7):
+        self.n_max = n_max
         self.mod = mod
-        self.modinv = self.make_modinv_list(n_max)
-        self.fac, self.facinv = self.make_factorial_list(n_max)
+        self.modinv = np.zeros(n_max+1, dtype=np.int64)
+        self.fac = np.ones(n_max+1, dtype=np.int64)
+        self.facinv = np.ones(n_max+1, dtype=np.int64)
+        self.make_modinv_list()
+        self.make_factorial_list()
 
-    def __call__(self, n, r):
+    def calc(self, n, r):
         return self.fac[n] * self.facinv[r] % self.mod * self.facinv[n-r] % self.mod
 
-    def make_factorial_list(self, n):
+    def make_factorial_list(self):
         # 階乗のリストと階乗のmod逆元のリストを返す O(n)
         # self.make_modinv_list()が先に実行されている必要がある
-        fac = [1]
-        facinv = [1]
-        for i in range(1, n+1):
-            fac.append(fac[i-1] * i % self.mod)
-            facinv.append(facinv[i-1] * self.modinv[i] % self.mod)
-        return fac, facinv
+        for i in range(1, self.n_max+1):
+            self.fac[i] = self.fac[i-1] * i % self.mod
+            self.facinv[i] = self.facinv[i-1] * self.modinv[i] % self.mod
 
-    def make_modinv_list(self, n):
+    def make_modinv_list(self):
         # 0からnまでのmod逆元のリストを返す O(n)
-        modinv = [0] * (n+1)
-        modinv[1] = 1
-        for i in range(2, n+1):
-            modinv[i] = self.mod - self.mod//i * modinv[self.mod%i] % self.mod
-        return modinv
+        self.modinv[1] = 1
+        for i in range(2, self.n_max+1):
+            self.modinv[i] = self.mod - self.mod//i * self.modinv[self.mod%i] % self.mod
 
 
 def factorization(n):
@@ -43,11 +53,11 @@ def factorization(n):
     for i in range(2, int(round(n ** 0.5)) + 1):
         cnt = 0
         while temp % i == 0:
-            cnt+=1
+            cnt += 1
             temp //= i
         if cnt > 0: arr.append([i, cnt])
     if temp!=1: arr.append([temp, 1])
-    if arr==[]: arr.append([n, 1])
+    if not arr: arr.append([n, 1])
     return arr
 
 
@@ -93,6 +103,8 @@ def euler_phi(n):
         ret -= ret // n
     return ret
 
+
+@njit("i8(i8,)", cache=True)
 def isqrt(n):
     """
     Newton's method
@@ -102,3 +114,15 @@ def isqrt(n):
     while y < x:
         x, y = y, (y + n // y) // 2
     return x
+
+
+@numba.njit("i8(i8,i8,i8)", cache=True)
+def pow_mod(base, exp, mod):
+    exp %= mod - 1
+    res = 1
+    while exp:
+        if exp & 1:
+            res = res * base % mod
+        base = base * base % mod
+        exp >>= 1
+    return res

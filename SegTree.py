@@ -1,3 +1,13 @@
+import numpy as np
+from numba import jitclass, i8
+
+spec = [
+    ('id_elem', i8),
+    ('num_max', i8),
+    ('x', i8[:]),
+]
+
+@jitclass(spec)
 class SegTree():
     """
     0-indexedの配列[a0, a1, a2, ..., a(N-1)]に対して以下のクエリをそれぞれO(logx)で行う：
@@ -9,11 +19,11 @@ class SegTree():
     def __init__(self, N):
         #####identity element######
         self.id_elem = 10**10
-        self.func = min
-
-        #num_max: the smallest power of two over N
-        self.num_max = 2 ** ((N - 1).bit_length())
-        self.x = [self.id_elem] * (2 * self.num_max - 1)
+        self.num_max = N
+        self.x = np.ones((2 * N - 1), dtype=np.int64) * self.id_elem
+    
+    def func(self, a, b):
+        return min(a, b)
 
     def get_elem(self, i):
         """

@@ -116,7 +116,7 @@ def isqrt(n):
     return x
 
 
-@numba.njit("i8(i8,i8,i8)", cache=True)
+@njit("i8(i8,i8,i8)", cache=True)
 def pow_mod(base, exp, mod):
     exp %= mod - 1
     res = 1
@@ -126,3 +126,65 @@ def pow_mod(base, exp, mod):
         base = base * base % mod
         exp >>= 1
     return res
+
+
+@njit("Tuple((i8,i8,i8))(i8,i8)", cache=True)
+def extgcd(a, b):
+    """
+    ax+by=gcd(a,b)なるx,yを出力する。
+    gcdは常に正の値を返す。x,yの範囲はよく分からん。
+    """
+    assert a * b != 0
+    abs_a = a if a > 0 else -a
+    abs_b = b if b > 0 else -b
+    if abs_a < abs_b:
+        exchange = True
+        abs_a, abs_b = abs_b, abs_a
+    else:
+        exchange = False
+    
+    c, d = abs_a, abs_b
+    x, y, u, v = 1, 0, 0, 1
+    while d != 0:
+        k = c // d
+        x -= k * u
+        y -= k * v
+        x, u = u, x
+        y, v = v, y
+        c, d = d, c % d
+    _gcd = abs_a * x + abs_b * y
+    
+    if _gcd < 0: x, y = -x, -y
+    if exchange: x, y = y, x
+    if a < 0: x *= -1
+    if b < 0: y *= -1
+    return x, y, _gcd
+
+
+@njit("Tuple((i8,i8))(i8,i8,i8,i8)", cache=True)
+def CRT(r1, m1, r2, m2):
+    """
+    t=r1(mod m1), t=r2(mod m2)となる最小のt>=0及びl=LCM(m1, m2)の組(t,l)を返す。
+    tの最小性を除けば、t+kl(k¥in Z)が解になることに注意。
+    extgcdの読み込みが必要。
+    解なしの時は(0, -1)を返す。
+
+    内容としてはt = m1*x+r1 = m2*y+r2 <=> m1*x-m2*y = r2-r1
+    なので、(r2-r1)がgcd(m1,m2)の倍数でなければ解なし。
+    倍数であればx0,y0,d = extgcd(m1,-m2)を用いてx,yが求まる。
+    """
+    x, y, d = extgcd(m1, -m2)
+    if (r2 - r1) % d != 0:
+        return 0, -1
+
+    _lcm = m1 * (m2 // d)
+    if _lcm < 0: _lcm *= -1
+
+    scale = (r2 - r1) // d
+    #t = m1 * x * scale + r1
+    #tt = m2 * y * scale + r2
+    #assert t == tt
+    #とするのが自然だが、これだと３つの掛け算でオーバーフローの危険があるので以下の工夫をする。
+    tmp = scale * x % (m2 // d)
+    t = (r1 + m1 * tmp) % _lcm
+    return t % _lcm, _lcm

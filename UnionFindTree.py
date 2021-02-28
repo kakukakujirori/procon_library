@@ -1,3 +1,5 @@
+import numpy as np
+
 class UnionFind():
     """
     https://note.nkmk.me/python-union-find/
@@ -12,7 +14,7 @@ class UnionFind():
         ただし根ノードのparentには(その木のノード数)*(-1)を格納する
         """
         self.n = n
-        self.parents = [-1] * n
+        self.parents = np.ones(n, dtype=np.int64) * -1
 
     def find(self, x):
         """

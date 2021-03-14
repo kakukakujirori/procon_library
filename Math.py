@@ -61,6 +61,7 @@ def factorization(n):
     return arr
 
 
+@njit("i8[:](i8,)", cache=True)
 def get_sieve_of_eratosthenes(n):
     """
     エラトステネスの篩。ただし高速素因数分解（cf.ABC177E）にも対応できるよう
@@ -72,9 +73,7 @@ def get_sieve_of_eratosthenes(n):
                                        = N * loglog(√N) (素数の逆数和の発散スピードがこれ)
                                        = N(loglogN - log2)
     """
-    if not isinstance(n, int):
-        raise TypeError('n is int type.')
-    prime = [i for i in range(n + 1)]
+    prime = np.arange(n + 1, dtype=np.int64)
     for p in range(2, int(n**0.5) + 1):
         if prime[p] != p: continue
         for i in range(p * 2, n + 1, p): prime[i] = p

@@ -60,3 +60,9 @@ class BIT:
         if j is None:
             return self.el[i]
         return self.sum(j) - self.sum(i - 1)
+    
+    def debug(self):
+        """
+        BITが仮想的に見ている配列を返す
+        """
+        return [self.get(i) for i in range(1, self.n + 1)]

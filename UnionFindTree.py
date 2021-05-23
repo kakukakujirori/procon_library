@@ -1,4 +1,5 @@
 import numpy as np
+# UnionFind.find()は再帰関数なのでnumba対応不可能
 
 class UnionFind():
     """

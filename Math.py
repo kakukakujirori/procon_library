@@ -45,21 +45,19 @@ class Combination:
         for i in range(2, self.n_max+1):
             self.modinv[i] = self.mod - self.mod//i * self.modinv[self.mod%i] % self.mod
 
-
 def factorization(n):
     assert n > 1, "factorization: input must be over 2, but given {}".format(n)
     arr = []
     temp = n
-    for i in range(2, int(round(n ** 0.5)) + 1):
+    for p in range(2, int(round(n ** 0.5)) + 1):
         cnt = 0
-        while temp % i == 0:
+        while temp % p == 0:
             cnt += 1
-            temp //= i
-        if cnt > 0: arr.append([i, cnt])
-    if temp!=1: arr.append([temp, 1])
+            temp //= p
+        if cnt > 0: arr.append([p, cnt])
+    if temp != 1: arr.append([temp, 1])
     if not arr: arr.append([n, 1])
     return arr
-
 
 @njit("i8[:](i8,)", cache=True)
 def get_sieve_of_eratosthenes(n):
@@ -108,6 +106,8 @@ def isqrt(n):
     """
     Newton's method
     nの平方根のfloorを求める。math.isqrtにも実装されてる。
+    f(x)=x^2-nとして、(xk,f(xk))における接線はy = 2xk(x - xk) + f(xk)
+    よってx(k+1) = xk - (xk^2 - n) / (2xk) = (xk + n / xk) / 2 
     """
     x, y = n, (n + 1) // 2
     while y < x:

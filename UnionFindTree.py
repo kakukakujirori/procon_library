@@ -1,4 +1,3 @@
-import numpy as np
 # UnionFind.find()は再帰関数なのでnumba対応不可能
 
 class UnionFind():
@@ -15,7 +14,7 @@ class UnionFind():
         ただし根ノードのparentには(その木のノード数)*(-1)を格納する
         """
         self.n = n
-        self.parents = np.ones(n, dtype=np.int64) * -1
+        self.parents = [-1] * n
 
     def find(self, x):
         """

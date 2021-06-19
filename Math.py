@@ -59,11 +59,11 @@ def factorization(n):
     if not arr: arr.append([n, 1])
     return arr
 
-@njit("i8[:](i8,)", cache=True)
+@njit
 def get_sieve_of_eratosthenes(n):
     """
     エラトステネスの篩。ただし高速素因数分解（cf.ABC177E）にも対応できるよう
-    prime[i] = (iを割り切る最小の素数)が記録される。
+    prime[i] = (iを割り切る素数たち)が格納される。
 
     方針としては√N以下の数に対して2から順にその数の倍数を消していく。
     計算量は「調和級数」になるのがミソ。具体的には
@@ -71,11 +71,33 @@ def get_sieve_of_eratosthenes(n):
                                        = N * loglog(√N) (素数の逆数和の発散スピードがこれ)
                                        = N(loglogN - log2)
     """
-    prime = np.arange(n + 1, dtype=np.int64)
-    for p in range(2, int(n**0.5) + 1):
-        if prime[p] != p: continue
-        for i in range(p * 2, n + 1, p): prime[i] = p
-    return prime
+    primes = [[i for i in range(0)] for _ in range(n + 1)]
+    for p in range(2, n + 1):
+        if primes[p]: continue
+        for i in range(p, n + 1, p):
+            primes[i].append(p)
+    return primes
+
+
+@njit
+def gcd_pair_num(L, R):
+    """
+    gcd_pair_num[k] = (L<=x,y<=Rでgcd(x,y)=kなる組(x,y)の個数)
+    xとyの大小関係は不問なことに注意。
+    ABC206Eがあまりに良問なのでライブラリにする次第。
+        gcd(x,y)=k <=> k|xかつk|yかつ2<=sに対してNOT(sk|x && sk|y)
+    なのでkが大きい方から計算するのがミソ。
+    計算量はエラトステネスの篩と同じくO(NloglogN)
+    """
+    assert 1 <= L <= R
+    gcd_pair_num = [0] * (R + 1)
+    for k in range(R, 0, -1):
+        num = R // k - (L - 1) // k
+        gcd_pair_num[k] = num * num
+        for s in range(2, R + 1):
+            if k * s > R: break
+            gcd_pair_num[k] -= gcd_pair_num[k * s]
+    return gcd_pair_num
 
 
 def euler_phi(n):

@@ -1,8 +1,10 @@
 import numpy as np
 from numba import jitclass, i8
 
+
 spec = [
     ('n', i8),
+    ('mod', i8),
     ('data', i8[:]),
     ('el', i8[:])
 ]
@@ -22,11 +24,12 @@ class BIT:
     もO(logN)で行うことができる
     """
 
-    def __init__(self, n):
+    def __init__(self, n, mod=-1):
         """
-        添字は1スタート
+        添字は1スタート、modは必要であれば設定しないと内部でオーバーフローする。
         """
         self.n = n
+        self.mod = mod
         self.data = np.zeros(n + 1, dtype=np.int64)
         self.el = np.zeros(n + 1, dtype=np.int64)
 
@@ -38,8 +41,10 @@ class BIT:
             raise ValueError("i should be within 1 to n")
         else:
             self.el[i] += x
+            if self.mod != -1: self.el[i] %= self.mod
             while i <= self.n:
                 self.data[i] += x
+                if self.mod != -1: self.data[i] %= self.mod
                 i += i & -i
 
     def sum(self, i):
@@ -49,6 +54,7 @@ class BIT:
         s = 0
         while i > 0:
             s += self.data[i]
+            if self.mod != -1: s %= self.mod
             i -= i & -i # i $ (-i)でiの最下位ビットのみ立った値を得る
         return s
 

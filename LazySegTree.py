@@ -1,3 +1,15 @@
+import numpy as np
+from numba import jitclass, i8
+
+spec = [
+    ('N', i8),
+    ('id_elem_X', i8),
+    ('id_elem_A', i8),
+    ('X', i8[:]),
+    ('A', i8[:]),
+]
+
+@jitclass(spec)
 class LazySegTree():
     """
     0-indexedの配列[x0, x1, ..., x(N-1)]に対して以下のクエリをそれぞれO(logx)で行う：
@@ -8,24 +20,23 @@ class LazySegTree():
     注意：セグ木自体の配列は1-indexed
     """
     # >>> SET YOURSELF >>>
-    id_elem_X = 0
-    id_elem_A = 0
- 
-    @classmethod
-    def op_X(cls, x, y): return None
+    def op_X(self, x, y): return min(x, y)
     
-    @classmethod
-    def op_A(cls, a, b): return None
+    def op_A(self, a, b): return a + b
  
-    @classmethod
-    def act(cls, x, a): return None
+    def act(self, x, a): return x + a
     # <<< SET YOURSELF <<<
 
     def __init__(self, N):
+        # >>> SET YOURSELF >>>
+        self.id_elem_X = 1 << 60
+        self.id_elem_A = 0
+        # <<< SET YOURSELF <<<
+
         # Nは2べきでなくても全く同様に動作する
         self.N = N
-        self.X = [self.id_elem_X] * (2 * N)
-        self.A = [self.id_elem_A] * (2 * N)
+        self.X = np.full((2 * N,), self.id_elem_X, dtype=np.int64)
+        self.A = np.full((2 * N,), self.id_elem_A, dtype=np.int64)
     
     def _eval_at(self, i):
         return self.act(self.X[i], self.A[i])
@@ -40,7 +51,9 @@ class LazySegTree():
         self.A[i] = self.id_elem_A
 
     def _propagate_above(self, i):
-        H = i.bit_length() - 1  # 根まで遡る回数
+        bitlen = 0
+        while pow(2, bitlen) <= i: bitlen += 1
+        H = bitlen - 1  # 根まで遡る回数
         for h in range(H, 0, -1):
             self._propagate_at(i >> h)  # 根から順に作用の伝搬を実行
 
@@ -90,6 +103,12 @@ class LazySegTree():
             j >>= 1
         self._recalc_above(i0)
         self._recalc_above(j0)
+    
+    def get_elem(self, i):
+        """
+        i番目の要素を返す
+        """
+        return self.mul(i, i+1)
 
     def mul(self, i, j):
         """

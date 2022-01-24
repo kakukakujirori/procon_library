@@ -1,6 +1,13 @@
-# UnionFind.find()は再帰関数なのでnumba対応不可能
+import numpy as np
+from numba import jitclass, i8
 
-class UnionFind():
+spec = [
+    ('n', i8),
+    ('parents', i8[:]),
+]
+
+@jitclass(spec)
+class UnionFind:
     """
     https://note.nkmk.me/python-union-find/
     DFSの上位互換と考えて良い
@@ -14,7 +21,7 @@ class UnionFind():
         ただし根ノードのparentには(その木のノード数)*(-1)を格納する
         """
         self.n = n
-        self.parents = [-1] * n
+        self.parents = np.full(n, -1, dtype=np.int64)
 
     def find(self, x):
         """
@@ -23,9 +30,17 @@ class UnionFind():
         """
         if self.parents[x] < 0:
             return x
-        else:
-            self.parents[x] = self.find(self.parents[x])
-            return self.parents[x]
+        #else:
+        #    self.parents[x] = self.find(self.parents[x])
+        #    return self.parents[x]
+
+        stack = [x]
+        while self.parents[x] >= 0:
+            x = self.parents[x]
+            stack.append(x)
+        for y in stack[:-1]:
+            self.parents[y] = x
+        return x
 
     def union(self, x, y):
         """
@@ -57,6 +72,9 @@ class UnionFind():
         """
         return self.find(x) == self.find(y)
 
+    ###### これ以降の操作は線形時間かかるので使用は非推奨 ######
+
+    '''
     def members(self, x):
         """
         xの属する木の要素を列挙する
@@ -82,7 +100,7 @@ class UnionFind():
          代表元がキーになってる
          """
          return {r: self.members(r) for r in self.roots()}
-
+    '''
     def __str__(self):
         """
         連結成分およびその代表元を出力

@@ -11,7 +11,6 @@ spec = [
 
 @jitclass(spec)
 class BIT:
-
     """
     https://tjkendev.github.io/procon-library/python/range_query/bit.html
     Binary index treeの実装
@@ -24,7 +23,7 @@ class BIT:
     もO(logN)で行うことができる
     """
 
-    def __init__(self, n, mod=-1):
+    def __init__(self, n: int, mod: int = -1):
         """
         添字は1スタート、modは必要であれば設定しないと内部でオーバーフローする。
         """
@@ -33,7 +32,7 @@ class BIT:
         self.data = np.zeros(n + 1, dtype=np.int64)
         self.el = np.zeros(n + 1, dtype=np.int64)
 
-    def add(self, i, x):
+    def add(self, i: int, x: int):
         """
         i>0に対してaiにxを加算(x < 0でもOK)
         """
@@ -44,29 +43,53 @@ class BIT:
             if self.mod != -1: self.el[i] %= self.mod
             while i <= self.n:
                 self.data[i] += x
-                if self.mod != -1: self.data[i] %= self.mod
+                if self.mod != -1:
+                    self.data[i] %= self.mod
                 i += i & -i
 
-    def sum(self, i):
+    def sum(self, i: int = -1):
         """
-        添字1からiまでの累積和を求める
+        a1+a2+...+aiを求める。
+        i=Noneの場合はj=self.nとして計算される。
         """
+        if i < 0: i = self.n
         s = 0
         while i > 0:
             s += self.data[i]
             if self.mod != -1: s %= self.mod
-            i -= i & -i # i $ (-i)でiの最下位ビットのみ立った値を得る
+            i -= i & -i # i&(-i)でiの最下位ビットのみ立った値を得る
         return s
 
-    def get(self, i, j=None):
+    def get(self, i: int, j: int = -1):
         """
-        添字iからjまでの累積和を求める
-        j=Noneの場合はaiの値を返す
+        ai+a(i+1)+...+ajを求める。
+        j=Noneの場合はj=self.nとして計算される。
         """
-        if j is None:
-            return self.el[i]
+        if j < 0: j = self.n
+        assert i <= j
         return self.sum(j) - self.sum(i - 1)
-    
+
+    def binary_search(self, x: int):
+        """
+        a1+a2+...+ai <= x < a1+a2+...+ai+a(i+1)となるiを求める。
+        BITをmultisetの代替として使用する場合に使える。
+        数列は正の数からのみ成ることが前提。必要であれば下2行のチェックを省いて高速化すること。
+        """
+        for i in range(1, self.n):
+            assert self.get(i, i) >= 0
+
+        if self.get(1, self.n) <= x:
+            return self.n + 1
+        left = 1  # a1+...+a(left) <= x
+        right = self.n  # x < a1+...+a(right)
+        while right - left > 1:
+            mid = (left + right) // 2
+            if self.get(1, mid) <= x:
+                left = mid
+            else:
+                right = mid
+        return left
+
     def debug(self):
         """
         BITが仮想的に見ている配列を返す

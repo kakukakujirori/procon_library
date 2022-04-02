@@ -1,22 +1,20 @@
 import sqlite3
 
-"""　MultiSetも同様に実装できそうなのでいつか試したい。。。　"""
-
 class OrderedSet():
     """
-    順序付き集合のPython実装。次の操作をlogオーダーで実行する：
-        - 集合 S に x を追加
+    順序付き集合のPython実装。次の操作をlogオーダーで実行する:
+        - 集合 S に x を追加
         - S に属する x より大きい要素のうち最小の要素を取得
         - S に属する x より小さい要素のうち最大の要素を取得
 
     ナイーブ実装だとTLEするのでsqliteを使う裏技で回避してる。
     ここの実装だと整数か実数しか入れられないので、より複雑なことをするなら
         - 自前でカラムを増やしたテーブルを定義する
-        - BITで座標圧縮してOrderedSetもどきを作る（要素数N<=10^6に限る）
-        - クエリを逆読みしてUnionFindを使う（適用可能ケースは限られる）
+        - BITで座標圧縮してOrderedSetもどきを作る(要素数N<=10^6に限る)
+        - クエリを逆読みしてUnionFindを使う(適用可能ケースは限られる）
     あたりを試すこと。
 
-    参考：https://atcoder.jp/contests/abc217/submissions/25621717
+    参考: https://atcoder.jp/contests/abc217/submissions/25621717
     """
     def __init__(self, dtype:str="INT"):
         if dtype == "INT":

@@ -209,3 +209,35 @@ def CRT(r1, m1, r2, m2):
     tmp = scale * x % (m2 // d)
     t = (r1 + m1 * tmp) % _lcm
     return t % _lcm, _lcm
+
+
+def matmul(A, B, mod=None):
+    ah, aw = len(A), len(A[0])
+    bh, bw = len(B), len(B[0])
+    assert aw == bh
+    ret = [[0] * bw for _ in range(ah)]
+    for i in range(ah):
+        for j in range(bw):
+            if mod is None:
+                ret[i][j] = sum([A[i][k] * B[k][j] for k in range(aw)])
+            else:
+                ret[i][j] = sum([A[i][k] * B[k][j] % mod for k in range(aw)])
+    return ret
+
+
+def matpow(M, k, mod=None):
+    l = len(M)
+    ret = [[0] * l for _ in range(l)]
+    for i in range(l):
+        ret[i][i] = 1
+    
+    if k < 0:
+        raise NotImplementedError
+    
+    while k > 0:
+        if k & 1:
+            ret = matmul(ret, M, mod)
+        M = matmul(M, M, mod)
+        k >>= 1
+    
+    return ret

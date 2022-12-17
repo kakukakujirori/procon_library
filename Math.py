@@ -137,18 +137,6 @@ def isqrt(n):
     return x
 
 
-@njit("i8(i8,i8,i8)", cache=True)
-def pow_mod(base, exp, mod):
-    exp %= mod - 1
-    res = 1
-    while exp:
-        if exp & 1:
-            res = res * base % mod
-        base = base * base % mod
-        exp >>= 1
-    return res
-
-
 @njit("Tuple((i8,i8,i8))(i8,i8)", cache=True)
 def extgcd(a, b):
     """

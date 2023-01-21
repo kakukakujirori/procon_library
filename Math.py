@@ -170,33 +170,29 @@ def extgcd(a, b):
     return x, y, _gcd
 
 
-@njit("Tuple((i8,i8))(i8,i8,i8,i8)", cache=True)
-def CRT(r1, m1, r2, m2):
-    """
-    t=r1(mod m1), t=r2(mod m2)となる最小のt>=0及びl=LCM(m1, m2)の組(t,l)を返す。
-    tの最小性を除けば、t+kl(k¥in Z)が解になることに注意。
-    extgcdの読み込みが必要。
-    解なしの時は(0, -1)を返す。
+def egcd(a, b):
+    if a == 0:
+        return b, 0, 1
+    else:
+        g, y, x = egcd(b % a, a)
+        return g, x - (b // a) * y, y
 
-    内容としてはt = m1*x+r1 = m2*y+r2 <=> m1*x-m2*y = r2-r1
-    なので、(r2-r1)がgcd(m1,m2)の倍数でなければ解なし。
-    倍数であればx0,y0,d = extgcd(m1,-m2)を用いてx,yが求まる。
-    """
-    x, y, d = extgcd(m1, -m2)
-    if (r2 - r1) % d != 0:
-        return 0, -1
 
-    _lcm = m1 * (m2 // d)
-    if _lcm < 0: _lcm *= -1
-
-    scale = (r2 - r1) // d
-    #t = m1 * x * scale + r1
-    #tt = m2 * y * scale + r2
-    #assert t == tt
-    #とするのが自然だが、これだと３つの掛け算でオーバーフローの危険があるので以下の工夫をする。
-    tmp = scale * x % (m2 // d)
-    t = (r1 + m1 * tmp) % _lcm
-    return t % _lcm, _lcm
+# https://qiita.com/drken/items/ae02240cd1f8edfc86fd
+# a = b1 (mod m1)
+# a = b2 (mod m2)
+# となるような、 a = r (mod m) を返す
+# m=-1のとき解なし。
+def crt(bList, mList):
+    r, m = 0, 1
+    for i in range(len(bList)):
+        d, x, y = egcd(m, mList[i])
+        if (bList[i] - r) % d != 0:
+            return [0, -1]
+        tmp = (bList[i] - r) // d * x % (mList[i] // d)
+        r += m * tmp
+        m *= mList[i] // d
+    return [r, m]
 
 
 def matmul(A, B, mod=None):

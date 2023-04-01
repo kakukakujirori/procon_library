@@ -1,8 +1,4 @@
-import numpy as np
-from numba import njit
-
-@njit("(i8,i8[:],i8[:])", cache=True)
-def stronglyConnectedComponents(N: int, edges_from: np.ndarray, edges_to: np.ndarray):
+def stronglyConnectedComponents(N, edges_from, edges_to):
     """
     グラフの強連結成分分解を行う。
     さらにこの時返されるgroupはトポロジカル順になる。
@@ -73,11 +69,16 @@ def stronglyConnectedComponents(N: int, edges_from: np.ndarray, edges_to: np.nda
 if __name__ == '__main__':
     """AtCoder Library Practice Contest G-SCC
     https://atcoder.jp/contests/practice2/tasks/practice2_g?lang=ja"""
-    import sys
 
-    N, M = np.fromstring(sys.stdin.readline(), dtype=int, sep=' ')
-    edges_from, edges_to = np.fromstring(sys.stdin.read(), dtype=int, sep=' ').reshape(M, 2).T
+    N, M = map(int, input().split())
+    edges_from, edges_to = [], []
+    for _ in range(M):
+        s, t = map(int, input().split())
+        edges_from.append(s)
+        edges_to.append(t)
+
     ans = stronglyConnectedComponents(N, edges_from, edges_to)
+
     print(len(ans))
     for line in ans:
         print(*([len(line)] + line))

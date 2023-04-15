@@ -30,6 +30,8 @@ class Combination:
         self.make_factorial_list()
 
     def calc(self, n, r):
+        assert n >= 0 and r >= 0
+        assert n >= r
         return self.fac[n] * self.facinv[r] % self.mod * self.facinv[n-r] % self.mod
 
     def make_factorial_list(self):
@@ -44,6 +46,7 @@ class Combination:
         self.modinv[1] = 1
         for i in range(2, self.n_max+1):
             self.modinv[i] = self.mod - self.mod//i * self.modinv[self.mod%i] % self.mod
+
 
 def factorization(n):
     assert n > 1, "factorization: input must be over 2, but given {}".format(n)

@@ -97,7 +97,7 @@ class MultiSet:
         return self.counter_all
 
     def count(self, x):        # O(1)
-        return self.counter[self.compress[x]]
+        return self.counter[self.compress[x]] if x in self.compress else 0
 
     def __getitem__(self, i):  # operator []: O(log n)
         if i < 0: i += len(self)
@@ -105,8 +105,8 @@ class MultiSet:
         if x > self.bit.n: raise IndexError('list index out of range')
         return self.inv_compress[x - 1]
 
-    def __contains__(self, x): # operator in: O(log n)
-        return self.bit.get(self.compress.get(x, self.bit.n) + 1, 0) > 0
+    def __contains__(self, x): # operator in: O(1)
+        return self.count(x) > 0
 
     def bisect_left(self, x):  # O(log n)
         return self.bit.sum(bisect.bisect_left(self.inv_compress, x))

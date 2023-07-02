@@ -55,7 +55,7 @@ class BIT:
     def get(self, i: int, j: int = -1):
         """
         ai+a(i+1)+...+ajを求める。
-        j=Noneの場合はj=self.nとして計算される。
+        j=-1の場合はj=self.nとして計算される。
         """
         if j < 0: j = self.n
         assert i <= j
@@ -86,7 +86,7 @@ class BIT:
         """
         BITが仮想的に見ている配列を返す
         """
-        return [self.get(i) for i in range(1, self.n + 1)]
+        return [self.get(i, i) for i in range(1, self.n + 1)]
 
 
 ################################################################
@@ -153,7 +153,7 @@ class NumbaBIT:
     def get(self, i: int, j: int = -1):
         """
         ai+a(i+1)+...+ajを求める。
-        j=Noneの場合はj=self.nとして計算される。
+        j=-1の場合はj=self.nとして計算される。
         """
         if j < 0: j = self.n
         assert i <= j
@@ -184,4 +184,4 @@ class NumbaBIT:
         """
         BITが仮想的に見ている配列を返す
         """
-        return [self.get(i) for i in range(1, self.n + 1)]
+        return [self.get(i, i) for i in range(1, self.n + 1)]
